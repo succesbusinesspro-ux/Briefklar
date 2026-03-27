@@ -20,6 +20,16 @@ export default function App() {
 
   const t = translations[language];
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     const consent = localStorage.getItem('cookie-consent');
     if (!consent) {
@@ -60,69 +70,83 @@ export default function App() {
 
   return (
     <div className={cn("min-h-screen flex flex-col bg-white", language === "Arabic" && "font-arabic")} dir={language === "Arabic" ? "rtl" : "ltr"}>
+      {/* Scroll Progress Bar */}
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-[100] origin-left"
+        style={{ scaleX: scrolled ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+      />
+
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className={cn(
+        "sticky top-0 z-50 transition-all duration-500",
+        scrolled 
+          ? "bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-lg shadow-gray-100/20 py-2" 
+          : "bg-white border-b border-transparent py-4"
+      )}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div 
-            className="flex items-center gap-2 cursor-pointer" 
+            className="flex items-center gap-3 cursor-pointer group" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center relative">
+            <div className="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center relative shadow-xl shadow-blue-100 group-hover:scale-105 transition-transform">
               <Mail className="text-white w-6 h-6" />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-blue-100">
                 <Search className="text-blue-600 w-3 h-3" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight leading-none">{t.common.appName}</span>
-              <span className="text-[9px] font-bold text-blue-600 tracking-widest uppercase">{t.common.byAssociation}</span>
+              <span className="text-2xl font-black tracking-tighter leading-none text-gray-900">{t.common.appName}</span>
+              <span className="text-[10px] font-black text-blue-600 tracking-[0.2em] uppercase mt-1">{t.common.byAssociation}</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-6">
             {/* Language Selector in Header */}
             <div className="relative group">
-              <button className="p-2 hover:bg-gray-50 rounded-xl transition-all flex items-center gap-2 border border-transparent hover:border-gray-100">
-                <Globe className="w-4 h-4 text-gray-400" />
-                <span className="text-lg leading-none">{languages.find(l => l.code === language)?.flag}</span>
+              <button className="px-3 py-2 hover:bg-gray-50 rounded-2xl transition-all flex items-center gap-2.5 border border-transparent hover:border-gray-100">
+                <Globe className="w-4.5 h-4.5 text-gray-400" />
+                <span className="text-xl leading-none">{languages.find(l => l.code === language)?.flag}</span>
               </button>
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[60] p-2">
+              <div className="absolute right-0 top-full mt-3 w-56 bg-white rounded-[24px] shadow-3xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[60] p-2.5">
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
                     className={cn(
-                      "w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-3",
-                      language === lang.code ? "bg-blue-50 text-blue-600" : "hover:bg-gray-50 text-gray-600"
+                      "w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-4",
+                      language === lang.code ? "bg-blue-50 text-blue-600 scale-[1.02]" : "hover:bg-gray-50 text-gray-500 hover:text-gray-900"
                     )}
                   >
-                    <span className="text-lg leading-none">{lang.flag}</span>
+                    <span className="text-xl leading-none grayscale-[0.2]">{lang.flag}</span>
                     <span>{lang.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="h-6 w-px bg-gray-100 mx-1 hidden sm:block" />
+            <div className="h-8 w-px bg-gray-100 mx-1 hidden sm:block" />
 
             {user ? (
-              <div className="flex items-center gap-2 sm:gap-4">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-100">
-                  <User className="w-3.5 h-3.5 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-600">{user.email?.split('@')[0]}</span>
+              <div className="flex items-center gap-3 sm:gap-5">
+                <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-700">{user.email?.split('@')[0]}</span>
                 </div>
                 <button 
                   onClick={handleLogout}
-                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                   title={t.common.logout}
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-5.5 h-5.5" />
                 </button>
               </div>
             ) : (
               <button 
                 onClick={() => setShowAuth(true)}
-                className="px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all text-xs sm:text-sm font-bold shadow-lg shadow-blue-100 whitespace-nowrap"
+                className="px-6 sm:px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all text-sm font-black shadow-xl shadow-blue-100 whitespace-nowrap active:scale-95"
               >
                 {t.common.login}
               </button>
