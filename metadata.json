@@ -1,0 +1,7 @@
+{
+  "name": "BriefKlar - Décodeur de Courriers Allemands",
+  "description": "Une application IA pour aider les immigrants en Allemagne à comprendre et répondre à leurs courriers administratifs (Finanzamt, Jobcenter, etc.).",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
